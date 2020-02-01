@@ -1,5 +1,7 @@
-const faker = require("faker");
+const express = require("express");
 const mysql = require("mysql");
+
+const app = express();
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -8,14 +10,16 @@ const connection = mysql.createConnection({
   database: "join_us"
 });
 
-const q = "insert into users(email, created_at) values ?";
+app.set("view engine", "ejs");
 
-const data = [];
+app.get("/", (req, res) => {
+  const q = "select count(*) as count from users";
+  connection.query(q, (err, results) => {
+    if (err) throw error;
+    const count = results[0].count;
+    // res.json(count);
+    res.render("home", { count });
+  });
+});
 
-for (let i = 0; i < 500; i++) {
-  data.push([faker.internet.email(), faker.date.past()]);
-}
-
-connection.query(q, [data], (err, results) => console.log(results));
-
-connection.end();
+app.listen(3000);
